@@ -72,7 +72,7 @@ init([H, P, _]) ->
     process_flag(trap_exit, true),
     PI = case kai:env(ping_interval_seconds) of
              I when is_integer(I) ->
-                 lager:info("KairosDB scheduling ping in ~w secs", [I]),
+                 lager:debug("KairosDB scheduling ping in ~w secs", [I]),
                  I * 1000;
              undefined ->
                  undefined
@@ -164,7 +164,7 @@ handle_info(Info, _, S1) ->
     {noreply, S1}.
 
 terminate(Reason, _StateName, #state{}=S1) ->
-    lager:info("Kairosdb connection terminating: ~p", [Reason]),
+    lager:debug("Kairosdb connection terminating: ~p", [Reason]),
     close_connection(S1),
     ok.
 
@@ -176,7 +176,7 @@ code_change(_OldVsn, StateName, State, _Extra) ->
 %%%===================================================================
 
 schedule_reconnect() ->
-    lager:info("Reconnecting to KairosDB in ~w", [?RECONNECT_TIME_MSECS]),
+    lager:debug("Reconnecting to KairosDB in ~w", [?RECONNECT_TIME_MSECS]),
     gen_fsm:send_event_after(?RECONNECT_TIME_MSECS, reconnect).
 
 close_connection(#state{socket=undefined}=State) ->
@@ -247,10 +247,10 @@ kairos_wait_reply(#state{socket = Socket}) ->
     end.
 
 kairos_connect(#state{host=H, port=P} = S, Opts) ->
-    lager:info("Connecting to KairosDB at ~s:~p", [H, P]),
+    lager:debug("Connecting to KairosDB at ~s:~p", [H, P]),
     case gen_tcp:connect(H, P, Opts) of
         {ok, Socket} ->
-            lager:info("Connected to KairosDB at ~s:~p", [H, P]),
+            lager:debug("Connected to KairosDB at ~s:~p", [H, P]),
             {ok, S#state{socket = Socket}};
         {error, _} = E ->
             E
